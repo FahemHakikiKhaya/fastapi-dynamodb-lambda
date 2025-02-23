@@ -1,0 +1,6 @@
+fastapi
+boto3
+python-dotenv
+pydantic
+mangum
+exceptiongroup

@@ -4,18 +4,14 @@ import uuid
 import os
 from dotenv import load_dotenv
 from pydantic import BaseModel
+from mangum import Mangum
 
 
 load_dotenv()
 
 app = FastAPI()
 
-dynamodb = boto3.resource( 
-    'dynamodb',
-    region_name=os.getenv('AWS_REGION'),
-    aws_access_key_id=os.getenv('AWS_ACCESS_KEY'),
-    aws_secret_access_key=os.getenv('AWS_SECRET_KEY')
-)
+dynamodb = boto3.resource('dynamodb')
 
 for table in dynamodb.tables.all():
     print(table.name)
@@ -31,7 +27,6 @@ class URLItem(BaseModel):
 
 @app.post("/shorten")
 def shorten_url(item: URLItem):
-    print(item)
     short_id = str(uuid.uuid4())[:8]
     table.put_item(
         Item={
@@ -47,3 +42,5 @@ def get_url(short_id: str):
     if 'Item' not in response:
         return {"error": "URL not found"}
     return {"url": response['Item']['url']}
+
+handler = Mangum(app)
